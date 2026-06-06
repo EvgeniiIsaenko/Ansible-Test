@@ -1,0 +1,6 @@
+---
+# vars file for roles/role_db
+postgresql_version: 14
+postgresql_user: "{{ db_user }}"
+postgresql_password: "{{ db_password }}"
+postgresql_db: "{{ db_name }}"

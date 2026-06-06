@@ -1,0 +1,62 @@
+- name: Install PostgreSQL
+  ansible.builtin.apt:
+    name:
+      - postgresql-{{ postgresql_version }}
+      - postgresql-contrib
+      - python3-psycopg2
+    state: present
+    update_cache: yes
+  tags: [install, db]
+
+- name: Configure PostgreSQL to listen on all interfaces (for Docker)
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/{{ postgresql_version }}/main/postgresql.conf
+    regexp: '^#?listen_addresses'
+    line: "listen_addresses = '*'"
+    backup: yes
+  tags: [config, db]
+  notify: restart postgresql
+
+- name: Ensure PostgreSQL is running and enabled
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: yes
+  tags: [config, db]
+
+- name: Wait for PostgreSQL to accept connections
+  ansible.builtin.wait_for:
+    port: 5432
+    host: 'localhost'
+    delay: 5
+    timeout: 60
+  tags: [deploy, db]
+
+- name: Create database user
+  become_user: postgres
+  become_method: su
+  postgresql_user:
+    name: "{{ postgresql_user }}"
+    password: "{{ postgresql_password }}"
+    encrypted: yes
+    state: present
+  tags: [deploy, db]
+
+- name: Create database
+  become_user: postgres
+  become_method: su
+  postgresql_db:
+    name: "{{ postgresql_db }}"
+    owner: "{{ postgresql_user }}"
+    state: present
+  tags: [deploy, db]
+
+- name: Grant all privileges on database to user
+  become_user: postgres
+  become_method: su
+  postgresql_privs:
+    db: "{{ postgresql_db }}"
+    privs: ALL
+    role: "{{ postgresql_user }}"
+    type: database
+  tags: [deploy, db]

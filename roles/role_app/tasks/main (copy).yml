@@ -1,0 +1,83 @@
+- name: Install system dependencies (Python, pip, virtualenv)
+  ansible.builtin.apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+      - git
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Create application directory
+  ansible.builtin.file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+  become: yes
+
+- name: Copy application files
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ app_dir }}/{{ item.dest }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+  loop:
+    - { src: "app.py", dest: "app.py" }
+    - { src: "requirements.txt", dest: "requirements.txt" }
+  become: yes
+  notify: restart flask-app
+
+- name: Deploy configuration from template
+  ansible.builtin.template:
+    src: app_config.py.j2
+    dest: "{{ app_dir }}/config.py"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+  become: yes
+  notify: restart flask-app
+
+
+- name: Create Python virtual environment
+  ansible.builtin.pip:
+    requirements: "{{ app_dir }}/{{ app_requirements }}"
+    virtualenv: "{{ app_dir }}/venv"
+    virtualenv_command: python3 -m venv
+  become: yes
+  become_user: "{{ app_user }}"
+  notify: restart flask-app
+
+- name: Deploy systemd service unit
+  ansible.builtin.template:
+    src: flask-app.service.j2
+    dest: /etc/systemd/system/flask-app.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart flask-app
+  become: yes
+
+- name: Extract IP address of eth0 using filters
+  set_fact:
+    app_bind_ip: >
+      {{ ansible_facts['eth0']['ipv4']['address'] 
+         if ansible_facts.get('eth0', {}).get('ipv4', {}).get('address') 
+         else '0.0.0.0' }}
+  when: ansible_facts is defined
+
+- name: Debug extracted IP
+  debug:
+    msg: "Application will bind to IP {{ app_bind_ip }}"
+
+- name: Wait for PostgreSQL to be ready
+  ansible.builtin.wait_for:
+    host: "{{ db_host | default('localhost') }}"
+    port: 5432
+    timeout: 60
+    delay: 5
+  vars:
+    db_host: "{{ db_host | default('localhost') }}"

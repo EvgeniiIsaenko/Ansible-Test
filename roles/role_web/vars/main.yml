@@ -1,0 +1,4 @@
+---
+# vars file for roles/role_web
+nginx_port: 80
+nginx_root: /var/www/default

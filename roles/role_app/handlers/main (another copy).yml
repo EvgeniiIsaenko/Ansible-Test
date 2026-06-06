@@ -1,0 +1,14 @@
+- name: restart flask-app
+  become: yes
+  block:
+    - name: Stop flask-app if running
+      ansible.builtin.shell: |
+        pkill -f "python3.*app.py" || true
+      ignore_errors: yes
+
+    - name: Start flask-app
+      ansible.builtin.shell: |
+        cd {{ app_dir }}
+        nohup {{ app_dir }}/venv/bin/python {{ app_dir }}/{{ flask_app }} > /var/log/flask-app.log 2>&1 &
+      async: 5
+      poll: 0

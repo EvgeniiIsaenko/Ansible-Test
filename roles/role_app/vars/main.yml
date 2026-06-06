@@ -1,0 +1,8 @@
+---
+# vars file for roles/role_app
+app_user: "{{ ansible_user }}"
+app_group: "{{ ansible_user }}"
+app_dir: /opt/myapp
+app_requirements: requirements.txt
+app_port: 5000
+flask_app: app.py

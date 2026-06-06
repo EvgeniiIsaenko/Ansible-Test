@@ -1,0 +1,19 @@
+nginx_port: 8080
+nginx_root: /var/www/staging
+
+app_port: 5000
+app_debug_mode: true
+
+db_host: "localhost"
+db_user: "app_user_staging"
+db_name: "app_staging"
+
+nginx_server_names:
+  - staging.example.com
+  - www.staging.example.com
+nginx_extra_logging: true
+nginx_client_max_body: "10M"
+
+nginx_extra_locations:
+  /static: /var/www/staging/static
+  /media: /var/www/staging/media

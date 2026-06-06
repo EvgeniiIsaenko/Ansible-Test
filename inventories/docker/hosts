@@ -1,0 +1,13 @@
+[staging]
+staging-host ansible_connection=docker ansible_user=root ansible_remote_tmp=/tmp
+
+[production]
+production-host ansible_connection=docker ansible_user=root ansible_remote_tmp=/tmp
+
+[webservers:children]
+staging
+production
+
+[databases:children]
+staging
+production

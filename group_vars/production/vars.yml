@@ -1,0 +1,15 @@
+nginx_port: 80
+nginx_root: /var/www/production
+
+app_port: 5001
+app_debug_mode: false
+
+db_host: "localhost"
+db_user: "app_user_prod"
+db_name: "app_production"
+
+nginx_server_names:
+  - example.com
+  - www.example.com
+nginx_extra_logging: false
+nginx_client_max_body: "50M"

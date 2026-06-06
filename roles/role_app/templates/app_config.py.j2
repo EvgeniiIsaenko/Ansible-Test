@@ -1,0 +1,8 @@
+DEBUG = {{ app_debug_mode | lower }}
+PORT = {{ app_port }}
+BIND_IP = "{{ app_bind_ip | default('0.0.0.0') }}"
+
+DB_HOST = "{{ db_host }}"
+DB_USER = "{{ db_user }}"
+DB_PASSWORD = "{{ db_password }}"
+DB_NAME = "{{ db_name }}"

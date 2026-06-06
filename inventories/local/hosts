@@ -1,0 +1,14 @@
+[local]
+localhost ansible_connection=local ansible_user=evgenii
+
+[staging]
+localhost ansible_connection=local
+
+[production]
+localhost ansible_connection=local
+
+[webservers]
+localhost
+
+[databases]
+localhost

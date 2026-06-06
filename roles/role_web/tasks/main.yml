@@ -1,0 +1,47 @@
+---
+# tasks file for roles/role_web
+- name: Install Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: yes
+  become: yes
+  tags: [install, web]
+
+- name: Ensure document root exists
+  ansible.builtin.file:
+    path: "{{ nginx_root }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  become: yes
+  tags: [config, web]
+
+- name: Deploy Nginx site configuration
+  ansible.builtin.template:
+    src: mysite.conf.j2
+    dest: /etc/nginx/sites-available/mysite.conf
+    owner: root
+    group: root
+    mode: '0644'
+  tags: [config, web]  
+  notify: restart nginx
+  become: yes
+
+- name: Enable site (create symlink)
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/mysite.conf
+    dest: /etc/nginx/sites-enabled/mysite.conf
+    state: link
+  tags: [config, web]
+  notify: restart nginx
+  become: yes
+
+- name: Remove default Nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  tags: [config, web]
+  notify: restart nginx
+  become: yes

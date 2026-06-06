@@ -1,0 +1,6 @@
+[production]
+prod-web ansible_host=10.0.0.50 ansible_user=evgenii
+prod-db ansible_host=10.0.0.51 ansible_user=evgenii
+
+[production:vars]
+ansible_python_interpreter=/usr/bin/python3

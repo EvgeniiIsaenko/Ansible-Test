@@ -1,0 +1,13 @@
+---
+# handlers file for roles/role_app
+- name: reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  become: yes
+
+- name: restart flask-app
+  ansible.builtin.systemd:
+    name: flask-app
+    state: restarted
+    enabled: yes
+  become: yes
